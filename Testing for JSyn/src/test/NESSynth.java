@@ -8,7 +8,9 @@ import com.jsyn.unitgen.TriangleOscillator;
 import com.jsyn.unitgen.UnitVoice;
 import com.jsyn.util.VoiceAllocator;
 import com.softsynth.shared.time.TimeStamp;
-
+/**
+ * A class that emulates the soud capabilities of the Nintendo Entertainment System (NES).
+ */
 public class NESSynth {
 	
 	private Synthesizer synth;
@@ -63,14 +65,15 @@ public class NESSynth {
 		
 		bitConverter.bitRate.set(BIT_RATE);
 		
-		synth.start(11025);
+		synth.start(48000);
 		lineOut.start();
 		
 		// Get synthesizer time in seconds.
-		TimeStamp timeStampNow = getCurrentTimeStamp();
+		double timeNow = synth.getCurrentTime();
+		TimeStamp timeStampNow = new TimeStamp(timeNow);
 		allocator.noteOff(69, timeStampNow);
 		// Advance to a near future time so we have a clean start.
-		time = getCurrentTimeDouble() + 1.0;
+		time = timeNow + 1.0;
 	}
 	
 	/**
@@ -80,65 +83,48 @@ public class NESSynth {
 		synth.stop();
 	}
 	
-	/**
-	 * @return the current synthesizer time as a TimeStamp
-	 */
-	public TimeStamp getCurrentTimeStamp() {
-		return new TimeStamp(synth.getCurrentTime());
-	}
-	
-	public double getCurrentTimeDouble() {
-		return synth.getCurrentTime();
-	}
-	
 	public double getGeneratorTime() {
 		return time;
 	}
 	
-	public void addTime(double time) {
-		this.time += time;
+	public void addTime(double addTime) {
+		this.time += addTime;
 	}
 	
 	public void playNote(double dur, int note1, int note2, int note3) throws InterruptedException {
 		catchUp(time);
 		
-		TimeStamp timeStamp = new TimeStamp(time);
-		triNoteOn(timeStamp, note1);
-		noteOn(timeStamp, note2);
-		noteOn(timeStamp, note3);
+		triNoteOn(time, note1);
+		noteOn(time, note2);
+		noteOn(time, note3);
 		
 		double offTime = time + dur / 2;
 		
-		TimeStamp offTimeStamp = new TimeStamp(offTime);
-		triangleVoice.noteOff(offTimeStamp);
-		noteOff(offTimeStamp, note2);
-		noteOff(offTimeStamp, note3);
+		triNoteOff(offTime);
+		noteOff(offTime, note2);
+		noteOff(offTime, note3);
 	}
 	
 	public void playNote(double dur, int note1, int note2) throws InterruptedException {
 		catchUp(time);
 		
-		TimeStamp timeStamp = new TimeStamp(time);
-		noteOn(timeStamp, note1);
-		noteOn(timeStamp, note2);
+		noteOn(time, note1);
+		noteOn(time, note2);
 		
 		double offTime = time + dur / 2;
 		
-		TimeStamp offTimeStamp = new TimeStamp(offTime);
-		noteOff(offTimeStamp, note1);
-		noteOff(offTimeStamp, note2);
+		noteOff(offTime, note1);
+		noteOff(offTime, note2);
 	}
 	
 	public void playNote(double dur, int note1) throws InterruptedException {
 		catchUp(time);
 		
-		TimeStamp timeStamp = new TimeStamp(time);
-		triNoteOn(timeStamp, note1);
+		triNoteOn(time, note1);
 		
 		double offTime = time + dur / 1.15;
 		
-		TimeStamp offTimeStamp = new TimeStamp(offTime);
-		triangleVoice.noteOff(offTimeStamp);
+		triNoteOff(offTime);
 	}
 	
 	public double convertPitchToFreq(double pitch) {
@@ -149,19 +135,25 @@ public class NESSynth {
 		synth.sleepUntil(time - advance);
 	}
 
-	private void noteOff(TimeStamp timeStamp, int noteNumber) {
-		allocator.noteOff(noteNumber, timeStamp);
+	private void noteOff(double time, int noteNumber) {
+		allocator.noteOff(noteNumber, new TimeStamp(time));
 	}
 
-	private void noteOn(TimeStamp timeStamp, int noteNumber) {
+	private void noteOn(double time, int noteNumber) {
 		double frequency = convertPitchToFreq(noteNumber);
 		double amplitude = 0.5;
+		TimeStamp timeStamp = new TimeStamp(time);
 		allocator.noteOn(noteNumber, frequency, amplitude, timeStamp);
 	}
 	
-	private void triNoteOn(TimeStamp timeStamp, int noteNumber) {
+	private void triNoteOff(double time) {
+		triangleVoice.noteOff(new TimeStamp(time));
+	}
+	
+	private void triNoteOn(double time, int noteNumber) {
 		double frequency = convertPitchToFreq(noteNumber);
 		double amplitude = 0.5;
+		TimeStamp timeStamp = new TimeStamp(time);
 		triangleVoice.noteOn(frequency, amplitude, timeStamp);
 	}
 	
