@@ -2,14 +2,11 @@ package test;
 
 import com.jsyn.JSyn;
 import com.jsyn.Synthesizer;
-import com.jsyn.unitgen.EnvelopeDAHDSR;
-import com.jsyn.unitgen.FilterLowPass;
 import com.jsyn.unitgen.LineOut;
 import com.jsyn.unitgen.SquareOscillatorBL;
 import com.jsyn.unitgen.TriangleOscillator;
 import com.jsyn.unitgen.UnitVoice;
 import com.jsyn.util.VoiceAllocator;
-import com.softsynth.jsyn.Synth;
 import com.softsynth.shared.time.TimeStamp;
 
 public class NESSynth {
@@ -20,8 +17,6 @@ public class NESSynth {
 	private TriangleOscillator triangleVoice;
 	private VoiceAllocator allocator;
 	private UnitVoice[] voices;
-	private NBitConverter[] bitConverters;
-	private FilterLowPass lowPassFilter;
 	
 	public final int MAX_VOICES = 2;
 	public final int BIT_RATE = 4;
@@ -58,7 +53,6 @@ public class NESSynth {
 		triangleVoice = new TriangleOscillator();
 		triangleVoice.noteOff();
 		NBitConverter bitConverter = new NBitConverter();
-		FilterLowPass filter = new FilterLowPass();
 		
 		synth.add(triangleVoice);
 		synth.add(bitConverter);

@@ -1,17 +1,5 @@
 package test;
 
-import com.jsyn.JSyn;
-import com.jsyn.Synthesizer;
-import com.jsyn.unitgen.EnvelopeDAHDSR;
-import com.jsyn.unitgen.LineOut;
-import com.jsyn.unitgen.SquareOscillator;
-import com.jsyn.unitgen.SquareOscillatorBL;
-import com.jsyn.unitgen.TriangleOscillator;
-import com.jsyn.unitgen.UnitVoice;
-import com.jsyn.util.VoiceAllocator;
-import com.softsynth.shared.time.ScheduledCommand;
-import com.softsynth.shared.time.TimeStamp;
-
 public class Test {
 	
 	private static NESSynth synth;
