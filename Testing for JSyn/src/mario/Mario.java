@@ -1,6 +1,6 @@
-package test;
+package mario;
 
-public class Test {
+public class Mario {
 	
 	private static NESSynth synth;
 	

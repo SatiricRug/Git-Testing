@@ -1,4 +1,4 @@
-package test;
+package mario;
 
 import com.jsyn.JSyn;
 import com.jsyn.Synthesizer;
