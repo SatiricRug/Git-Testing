@@ -1,15 +1,13 @@
 package synth;
 
+import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.Toolkit;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
 import javax.swing.BorderFactory;
-import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import javax.swing.UIManager;
@@ -31,6 +29,9 @@ public class Synth extends JFrame {
 	private JPanel panel;
 	
 	private Synthesizer synth;
+	
+	private static int sizeX = 770;
+	private static int sizeY = 300;
 	
 	public Synth() {
 		//AUDIO
@@ -67,10 +68,12 @@ public class Synth extends JFrame {
 			
 			@Override
 			public void itemStateChanged(ItemEvent e) {
+				JToggleButton changedButton = (JToggleButton) e.getItem();
+				String buttonText = changedButton.getText();
 				if (e.getStateChange() == ItemEvent.SELECTED)  {
-					System.out.println(getContentPane().getSize());
+					System.out.println("Button " + buttonText + " selected");
 				} else if (e.getStateChange() == ItemEvent.DESELECTED) {
-					
+					System.out.println("Button " + buttonText + " deselected");
 				}
 			}
 			
@@ -103,8 +106,16 @@ public class Synth extends JFrame {
 		
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setTitle("Synth");
-		frame.setSize(760, 300);
-		frame.setLocation(540, 350);
+		
+		//Get size of monitor in pixels
+		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		int screenX = screenSize.width;
+		int screenY = screenSize.height;
+		
+		//Set size and location of JFrame
+		frame.setSize(sizeX, sizeY);
+		frame.setLocation((screenX - sizeX) / 2, (screenY - sizeY) / 2);
+		
 		frame.setVisible(true);
 	}
 	
