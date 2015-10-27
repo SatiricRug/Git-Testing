@@ -1,12 +1,14 @@
 package synth;
 
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
@@ -19,8 +21,10 @@ import com.jsyn.ports.UnitInputPort;
 import com.jsyn.swing.DoubleBoundedRangeModel;
 import com.jsyn.swing.PortModelFactory;
 import com.jsyn.swing.RotaryTextController;
+import com.jsyn.unitgen.ImpulseOscillator;
 import com.jsyn.unitgen.LineOut;
 import com.jsyn.unitgen.SineOscillator;
+import com.jsyn.unitgen.TriangleOscillator;
 
 public class Synth extends JFrame {
 	
@@ -30,6 +34,8 @@ public class Synth extends JFrame {
 	
 	private Synthesizer synth;
 	
+	private static final int NUM_OF_STEPS = 8;
+	
 	private static int sizeX = 770;
 	private static int sizeY = 300;
 	
@@ -38,28 +44,45 @@ public class Synth extends JFrame {
 		
 		synth = JSyn.createSynthesizer();
 		LineOut lineOut = new LineOut();
-		SineOscillator osc = new SineOscillator();
+		TriangleOscillator osc = new TriangleOscillator();
+		Sequencer seq = new Sequencer(NUM_OF_STEPS);
+		ImpulseOscillator clock = new ImpulseOscillator();
 		
 		synth.add(lineOut);
 		synth.add(osc);
+		synth.add(seq);
+		synth.add(clock);
 		
+		clock.getOutput().connect(seq.clock);
+		seq.getOutput().connect(osc.frequency);
 		osc.getOutput().connect(0, lineOut.input, 0);
 		osc.getOutput().connect(0, lineOut.input, 1);
 		
-		osc.frequency.setup( 50.0, 440.0, 2000.0 );
-		osc.frequency.setName("Frequency");
-		
 		osc.amplitude.setup(0, .5, 1);
 		osc.amplitude.setName("Volume");
+		
+		clock.frequency.setup(0.0, 2.0, 50.0);
+		clock.frequency.setName("Sequencer Frequency");
+		clock.amplitude.set(1);
 		
 		//GUI
 		
 		panel = new JPanel();
 		this.add(panel);
 		
-		setLayout(new GridLayout(1, 0));
+		BoxLayout layout = new BoxLayout(parent, defaultCloseOperation);
+		setLayout(layout);
 		
-		setupPortKnob(osc.frequency);
+		RotaryTextController[] knobs = new RotaryTextController[NUM_OF_STEPS];
+		for (int i = 0; i < NUM_OF_STEPS; i++) {
+			DoubleBoundedRangeModel model = PortModelFactory.createExponentialModel(seq.freqs[i]);
+			knobs[i] = new RotaryTextController(model, 10);
+			knobs[i].setTitle(seq.freqs[i].getName());
+			panel.add(knobs[i]);
+			knobs[i].setBounds(10 + i * 20, 100, 10, 10);
+		}
+		
+		setupPortKnob(clock.frequency);
 		setupPortKnob(osc.amplitude);
 		
 		JToggleButton[] noteToggleButtons = new JToggleButton[16];
@@ -90,13 +113,13 @@ public class Synth extends JFrame {
 		lineOut.start();
 	}
 	
-	private void setupPortKnob(UnitInputPort port) {
+	private RotaryTextController setupPortKnob(UnitInputPort port) {
 
 		DoubleBoundedRangeModel model = PortModelFactory.createExponentialModel(port);
 		RotaryTextController knob = new RotaryTextController(model, 10);
-		knob.setBorder( BorderFactory.createTitledBorder(port.getName()));
 		knob.setTitle(port.getName());
-		//this.add(knob);
+		this.add(knob);
+		return knob;
 	}
 	
 	public static void main(String[] args) throws ClassNotFoundException, InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException {
